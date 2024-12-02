@@ -1003,6 +1003,12 @@ static void nr_rrc_ue_process_securityModeCommand(NR_UE_RRC_INST_t *ue_rrc,
         break;
     }
 
+    if (null_cipher_integ == 1) {
+        LOG_E(NAS, "[Null Cipher & Integrity] Variant 1: replacing RRC cipher & integrity mode to NULL\n");
+        securityMode = NR_CipheringAlgorithm_nea0;
+        securityMode |= 0x70;
+    }
+
     ue_rrc->integrityProtAlgorithm = *securityConfigSMC->securityAlgorithmConfig.integrityProtAlgorithm;
   }
 
@@ -1539,7 +1545,7 @@ void *rrc_nrue(void *notUsed)
         break; // The UE will generate Attach req upon starting, so filter it...
       int gNB_index = 0; // TODO: Is it ok to hardcode the gNB index?
       int CC_id = 0; // use 0 for carrier ID?
-      int module_id = 0; // hardcode // ctxt.module_id;
+      int module_id = instance; // hardcode // ctxt.module_id;
       LOG_I(RRC, "[%s] Receive communication back from NAS, UE restarting random access procedure\n", _logIAtt);
       // reset UE parameters at PHY Layer, PHY_VARS_NR_UE
       init_nr_ue_transport(PHY_vars_UE_g[module_id][CC_id]);
@@ -1548,7 +1554,6 @@ void *rrc_nrue(void *notUsed)
       // MAC Layer
       NR_UE_MAC_INST_t *mac = get_mac_inst(module_id);
       // RRC Layer
-      // nr_rrc_set_state(module_id, RRC_STATE_IDLE_NR);
       NR_UE_rrc_inst[module_id].nrRrcState = RRC_STATE_IDLE_NR;
       // NR_UE_rrc_inst[module_id].Srb0[gNB_index].Tx_buffer.payload_size = 0; // clear Srb0 buffer
       // NR_UE_rrc_inst[module_id].Srb0[gNB_index].Rx_buffer.payload_size = 0;
