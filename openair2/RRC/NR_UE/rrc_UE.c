@@ -971,6 +971,13 @@ static void nr_rrc_ue_process_securityModeCommand(NR_UE_RRC_INST_t *ue_rrc,
   NR_SecurityConfigSMC_t *securityConfigSMC =
       &securityModeCommand->criticalExtensions.choice.securityModeCommand->securityConfigSMC;
 
+  if (null_cipher_integ == 1) {
+    LOG_E(NAS, "[Null Cipher & Integrity] Variant 1: replacing RRC cipher & integrity mode to NULL\n");
+    securityConfigSMC->securityAlgorithmConfig.cipheringAlgorithm = NR_CipheringAlgorithm_nea0;
+    int null_integirty_mode = NR_IntegrityProtAlgorithm_nia0;
+    securityConfigSMC->securityAlgorithmConfig.integrityProtAlgorithm = &null_integirty_mode;
+  }
+
   switch (securityConfigSMC->securityAlgorithmConfig.cipheringAlgorithm) {
     case NR_CipheringAlgorithm_nea0:
     case NR_CipheringAlgorithm_nea1:
@@ -1002,13 +1009,6 @@ static void nr_rrc_ue_process_securityModeCommand(NR_UE_RRC_INST_t *ue_rrc,
         securityMode |= 0x70;
         break;
     }
-
-    if (null_cipher_integ == 1) {
-        LOG_E(NAS, "[Null Cipher & Integrity] Variant 1: replacing RRC cipher & integrity mode to NULL\n");
-        securityMode = NR_CipheringAlgorithm_nea0;
-        securityMode |= 0x70;
-    }
-
     ue_rrc->integrityProtAlgorithm = *securityConfigSMC->securityAlgorithmConfig.integrityProtAlgorithm;
   }
 
